@@ -1,0 +1,17 @@
+*************************************
+**   Secure Web Api server app     **
+*************************************
+
+Example of secure Web API server application
+
+*********** Install notes ***********
+
+Get source code with simple command:
+> git clone https://github.com/chval/simple-sec-api.git
+
+Then
+> npm install
+> npm start
+
+Development tools can be found at `server/bin/` directory
+
