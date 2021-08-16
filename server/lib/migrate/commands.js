@@ -157,7 +157,7 @@ async function list() {
 * Select last file record from migrations table
 */
 async function last() {
-    let migrObj = await db.select('file').from(settings.DB_MIGRATIONS_TABLE).orderBy('created_at', 'desc').limit(1);
+    let migrObj = await db.select('file').from(settings.DB_MIGRATIONS_TABLE).orderBy('id', 'desc').limit(1);
 
     return migrObj.length ? migrObj[0].file : null;
 }
