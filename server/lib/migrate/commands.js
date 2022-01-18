@@ -6,7 +6,8 @@ const path = require('path');
 
 const settings = include('settings');
 const fileDateHelper = include('migrate/sql-file-date');
-const db = include('knex');
+
+const dbConnect = include('knex');
 
 /*
 * Get all sql migration files that match pattern
@@ -64,6 +65,7 @@ async function _getNotMigrated() {
     let files = _getAllFiles();
 
     let migratedFiles = {};
+    let db = await dbConnect.getInstance();
     let migrObjs = await db.select('file').table(settings.DB_MIGRATIONS_TABLE);
 
     migrObjs.forEach(mo => {
@@ -119,6 +121,7 @@ async function update(files) {
         files = await _getNotMigrated();
     }
 
+    let db = await dbConnect.getInstance();
     let doneFiles = [];
 
     for ( let i = 0; i < files.length; i++ ) {
@@ -157,6 +160,7 @@ async function list() {
 * Select last file record from migrations table
 */
 async function last() {
+    let db = await dbConnect.getInstance();
     let migrObj = await db.select('file').from(settings.DB_MIGRATIONS_TABLE).orderBy('id', 'desc').limit(1);
 
     return migrObj.length ? migrObj[0].file : null;
@@ -166,6 +170,7 @@ async function last() {
 * Remove file record from migrations table
 */
 async function drop(files) {
+    let db = await dbConnect.getInstance();
     let doneFiles = [];
 
     for ( let i = 0; i < files.length; i++ ) {
