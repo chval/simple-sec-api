@@ -1,0 +1,11 @@
+extends ../layouts/main.pug
+block main_content
+    div.container
+        form
+            div.form-group
+                label(for='user_email') Email address
+                input#user_email.form-control(type='email' name='email' placeholder='Email')
+            div.form-group
+                label(for='user_password') Password
+                input#user_password.form-control(type='password' name='password' placeholder='Password')
+            button.btn.btn-primary(type='submit') Register
