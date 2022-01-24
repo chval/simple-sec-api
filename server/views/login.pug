@@ -1,0 +1,54 @@
+extends layouts/base.pug
+block body_content
+    style.
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .form-signin {
+            width: 100%;
+            max-width: 330px;
+            padding: 15px;
+            margin: auto;
+        }
+
+        .form-signin .checkbox {
+            font-weight: 400;
+        }
+
+        .form-signin .form-floating:focus-within {
+            z-index: 2;
+        }
+
+        .form-signin input[type="email"] {
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .form-signin input[type="password"] {
+            margin-bottom: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+    body.text-center
+    main.form-signin
+        form
+        h1.h3.mb-3.fw-normal Sign in to proceed
+        div.form-floating
+            input#user_email.form-control(type='email' name='email' placeholder='Email')
+            label(for='user_email') Email address
+        div.form-floating
+            input#user_password.form-control(type='password' name='password' placeholder='Password')
+            label(for='user_password') Password
+        button.w-100.btn.btn-lg.btn-primary(type='submit') Sign in
