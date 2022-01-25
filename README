@@ -11,6 +11,16 @@ Get source code with simple command:
 
 Then
 > npm install
+
+Create server/.env file with next variables
+SEC_API_PORT=8080
+SEC_API_SESSION_SECRET=some_secret
+SEC_API_SESSION_TTL_MS=60000
+
+Update database
+> node server/bin/migrate.js up
+
+Start server
 > npm start
 
 Development tools can be found at `server/bin/` directory
