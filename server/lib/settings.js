@@ -11,7 +11,8 @@ const settings = {
             filename: db_dir + 'sec_api_db.sqlite3'
         }
     },
-    DB_MIGRATIONS_TABLE: '_migrations'
+    DB_MIGRATIONS_TABLE: '_migrations',
+    DB_SESSIONS_TABLE: '_sessions'
 };
 
 module.exports = settings;
