@@ -1,11 +1,19 @@
 extends ../layouts/main.pug
 block main_content
     div.container
-        form
-            div.form-group
+        if errors && errors.length
+            each error in errors
+                div.alert.alert-danger.alert-dismissible.fade.show(role='alert')= error
+                    button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+        if success
+            div.alert.alert-success.alert-dismissible.fade.show(role='alert') !{success}
+                button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+        - formData ||= {};
+        form(method='post' action='/register')
+            div.mb-3
                 label(for='user_email') Email address
-                input#user_email.form-control(type='email' name='email' placeholder='Email')
-            div.form-group
+                input#user_email.form-control(type='email' name='email' placeholder='Email' value=formData.email)
+            div.mb-3
                 label(for='user_password') Password
                 input#user_password.form-control(type='password' name='password' placeholder='Password')
             button.btn.btn-primary(type='submit') Register
