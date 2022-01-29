@@ -5,13 +5,14 @@ const session = require('express-session');
 const knexSessionStore  = require("connect-session-knex")(session);
 
 const path = require('path');
-const mainRouter = require('./routes/main');
 require('dotenv').config({ path: path.join(__dirname, '/.env') });
 
 // include local libraries
 global.include = function(path) {
     return require(__dirname + '/lib/' + path);
 }
+
+const mainRouter = require('./routes/main');
 
 const settings = include('settings');
 const dbConnect = include('knex');
