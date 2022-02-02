@@ -43,6 +43,7 @@ class UserLogin {
 
             this.id = userLogins[0].id;
             this.user_id = userLogins[0].user_id;
+            this.password = userLogins[0].password;
         }
 
         this._loaded = true;

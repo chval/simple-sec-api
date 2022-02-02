@@ -5,6 +5,7 @@ const userExceptionCodes = {
     'register.user_exists': 'User already exists',
     'register.required.email': 'Email address is required',
     'register.required.password': 'Password is required',
+    'login.verify': 'Invalid credentials',
 };
 
 class UserException {
