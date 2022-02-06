@@ -43,13 +43,17 @@ block body_content
 
     body.text-center
     main.form-signin
-        form(method='post' action='/login')
+        form(method='post' action='/auth/login')
             h1.h3.mb-3.fw-normal Sign in to proceed
+            - formData ||= {};
             div.form-floating
-                input#user_email.form-control(type='email' name='email' placeholder='Email')
+                input#user_email.form-control(type='email' name='email' placeholder='Email' value=formData.email)
                 label(for='user_email') Email address
             div.form-floating
                 input#user_password.form-control(type='password' name='password' placeholder='Password')
                 label(for='user_password') Password
             button.w-100.btn.btn-lg.btn-primary(type='submit') Sign in
-            small Don't have an account? Please #[a(href='/register') register]
+            if error
+                small.text-danger= error
+                br
+            small Don't have an account? Please #[a(href='/auth/register') register]

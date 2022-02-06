@@ -1,8 +1,8 @@
 'use strict';
 
 const dbConnect = include('knex');
-const Password = include('helpers/Password');
-const UserException = include('helpers/UserException');
+const Password = include('auth/Password');
+const UserException = include('ui/UserException');
 
 class UserLogin {
     constructor(data) {

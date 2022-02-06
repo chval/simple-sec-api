@@ -9,7 +9,7 @@ block main_content
             div.alert.alert-success.alert-dismissible.fade.show(role='alert') !{success}
                 button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
         - formData ||= {};
-        form(method='post' action='/register')
+        form(method='post' action='/auth/register')
             div.mb-3
                 label(for='user_email') Email address
                 input#user_email.form-control(type='email' name='email' placeholder='Email' value=formData.email)
