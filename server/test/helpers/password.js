@@ -4,7 +4,7 @@ global.include = function(path) {
     return require(__dirname + '/../../lib/' + path);
 }
 
-const Password = include('helpers/Password');
+const Password = include('auth/Password');
 
 describe('Helpers -> Password', function() {
     it('should generate a salt and password encrypted hash with a fixed length', function() {

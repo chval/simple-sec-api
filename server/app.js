@@ -13,6 +13,7 @@ global.include = function(path) {
 }
 
 const mainRouter = require('./routes/main');
+const authRouter = require('./routes/auth');
 
 const settings = include('settings');
 const dbConnect = include('knex');
@@ -49,6 +50,7 @@ dbConnect.getInstance().then((knex) => {
 
     // add routes usage here
     app.use('/', mainRouter);
+    app.use('/auth', authRouter);
 
     // start listening
     app.listen(port, host, () => {
