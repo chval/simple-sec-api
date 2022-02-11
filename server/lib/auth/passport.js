@@ -2,24 +2,34 @@
 
 const passport = require('passport');
 
-const authStrategy = include('auth/local-strategy');
+const localStrategy = include('auth/local-strategy');
 const User = include('models/User');
 
-passport.use(authStrategy);
+class LocalPassport {
+    constructor() {
+        passport.use(localStrategy.instance);
 
-passport.serializeUser(function(userId, done) {
-    process.nextTick(() => {
-        done(null, userId);
-    });
-});
+        passport.serializeUser(function(userId, done) {
+            process.nextTick(() => {
+                done(null, userId);
+            });
+        });
 
-passport.deserializeUser((userId, done) => {
-    process.nextTick(async () => {
-        const user = new User({ id: userId });
-        await user.load();
+        passport.deserializeUser((userId, done) => {
+            process.nextTick(async () => {
+                const user = new User({ id: userId });
+                await user.load();
 
-        done(null, user);
-    });
-});
+                done(null, user);
+            });
+        });
 
-module.exports = passport;
+        return passport;
+    }
+
+    static getInstance() {
+        return passport;
+    }
+}
+
+module.exports = LocalPassport;
