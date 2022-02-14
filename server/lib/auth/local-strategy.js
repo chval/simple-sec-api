@@ -5,7 +5,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const UserLogin = include('models/UserLogin');
 const Password = include('auth/Password');
 
-module.exports = new LocalStrategy(
+module.exports.instance = new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password'

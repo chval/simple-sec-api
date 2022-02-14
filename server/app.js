@@ -26,6 +26,7 @@ const app = express();
 
 // static bootstrap files
 app.use('/bootstrap', express.static(path.join(__dirname, '../node_modules/bootstrap/dist')));
+app.use('/js', express.static(path.join(__dirname, '../public/js')));
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '/views'));
