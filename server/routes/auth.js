@@ -3,7 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const passport = include('auth/passport');
+const LocalPassport = include('auth/passport');
 const UserLogin = include('models/UserLogin');
 const UserException = include('ui/UserException');
 const UserText = include('ui/UserText');
@@ -15,14 +15,6 @@ router.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 router.use(bodyParser.json());
-
-// init auth passport
-router.use(passport.initialize());
-router.use(passport.session());
-
-router.get('/', (req, res) => {
-    res.render('main/index');
-});
 
 router.get('/login', (req, res) => {
     res.render('login');
@@ -76,6 +68,8 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
+    const passport = LocalPassport.getInstance();
+
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             return next(err);
@@ -89,6 +83,12 @@ router.post('/login', (req, res, next) => {
             });
         }
     })(req, res, next);
+});
+
+router.delete('/logout', (req, res) => {
+    req.logout();
+
+    res.status(200).end();
 });
 
 module.exports = router;
