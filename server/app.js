@@ -39,7 +39,6 @@ dbConnect.getInstance().then((knex) => {
         saveUninitialized: false,
         cookie: {
             secure: false,
-            maxAge: Number(process.env.SEC_API_SESSION_TTL_MS)
         },
         store: new knexSessionStore({
             knex: knex,

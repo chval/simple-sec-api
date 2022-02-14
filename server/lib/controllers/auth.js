@@ -75,6 +75,12 @@ module.exports.postLogin = function(req, res, next) {
             req.login(user, function(err) {
                 if (err) return next(err);
 
+                if ( req.body.remember_me === 'on' ) {
+                    req.session.cookie.expires = new Date(Date.now() + process.env.SEC_API_SESSION_TTL_MS);
+                } else {
+                    req.session.cookie.expires = false;
+                }
+
                 return res.redirect('/');
             });
         }
