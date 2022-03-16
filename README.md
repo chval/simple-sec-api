@@ -29,6 +29,49 @@ Prepare SQLite3 database. After next command `.sqlite3` database file will be cr
 node server/bin/migrate.js up
 ```
 
+Install and run [MongoDB Community Server](https://www.mongodb.com/try/download/community).
+Then create user administrator who will have a permissions to create a new users and databases
+```
+use admin
+db.createUser(
+  {
+    user: "myUserAdmin",
+    pwd: passwordPrompt(),
+    roles: [
+      { role: "userAdminAnyDatabase", db: "admin" },
+      { role: "readWriteAnyDatabase", db: "admin" }
+    ]
+  }
+)
+```
+
+To protect from unauthorized access to db, add next option to `/etc/mongod.conf`
+```
+security:
+  authorization: enabled
+```
+
+Create a new database and collection from common translation keys
+```
+use translations
+db.common.insertOne({
+    key: "exception_general",
+    en_value: "Sorry, something went wrong"
+})
+```
+
+Create a user who will manage translations
+```
+use SecApi
+db.createUser(
+  {
+    user: "translator",
+    pwd:  passwordPrompt(),
+    roles: [ { role: "readWrite", db: "translations" } ]
+  }
+)
+```
+
 Run tests
 ```
 npm test
