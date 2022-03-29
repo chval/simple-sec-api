@@ -35,15 +35,17 @@ class User {
 
         const db = await dbConnect.getInstance();
         const users = await db('user').where('id', this.id);
+        const [user] = users;
 
-        if ( users.length ) {
+        if ( user ) {
 
-            this.id = users[0].id;
-            this.first_name = users[0].first_name;
-            this.last_name = users[0].last_name;
+            this.id = user.id;
+            this.first_name = user.first_name;
+            this.last_name = user.last_name;
         }
 
         this._loaded = true;
+        return this._loaded;
     }
 
     async save() {

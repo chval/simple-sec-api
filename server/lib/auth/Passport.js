@@ -18,7 +18,14 @@ class LocalPassport {
         passport.deserializeUser((userId, done) => {
             process.nextTick(async () => {
                 const user = new User({ id: userId });
-                await user.load();
+                const isLoaded = await user.load().catch(err => {
+                    console.error(err);
+                    return false;
+                });
+
+                if ( !isLoaded ) {
+                    return done(null, false);
+                }
 
                 done(null, user);
             });
