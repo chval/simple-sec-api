@@ -7,9 +7,18 @@ global.include = function(path) {
     return require(__dirname + '/../lib/' + path);
 }
 
+const KnexConnect = include('KnexConnect');
 const commands = include('migrate/commands');
 
 (async () => {
+
+    // init database
+    await KnexConnect.init()
+        .catch((err) => {
+            console.error(err);
+            process.exit(1);
+        });
+
     const opts = await initYargs();
 
     const command = opts._[0];
