@@ -16,7 +16,8 @@ const mainRouter = require('./routes/main');
 const authRouter = require('./routes/auth');
 
 const settings = include('settings');
-const dbConnect = include('knex');
+const KnexConnect = include('KnexConnect');
+const MongoConnect = include('MongoConnect');
 
 // app initialization start
 const port = process.env.SEC_API_PORT || 8080;
@@ -31,8 +32,17 @@ app.use('/js', express.static(path.join(__dirname, '../public/js')));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '/views'));
 
-// we need to prepare database for sessions
-dbConnect.getInstance().then((knex) => {
+Promise.all([KnexConnect.init(), MongoConnect.init()])
+    .then(dbs => {
+        const [knex, mongo] = dbs;
+        startApp(knex);
+    })
+    .catch(err => {
+        console.error(err);
+        process.exit(1);
+    });
+
+function startApp(knex) {
     app.use(session({
         secret: process.env.SEC_API_SESSION_SECRET,
         resave: false,
@@ -57,4 +67,4 @@ dbConnect.getInstance().then((knex) => {
     app.listen(port, host, () => {
         console.log(`Running on ${host}:${port}`);
     });
-});
+}
