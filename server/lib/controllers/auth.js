@@ -1,9 +1,9 @@
 'use strict';
 
 const UserLogin = include('models/UserLogin');
-const UserException = include('ui/UserException');
-const UserText = include('ui/UserText');
+const Translation = include('ui/Translation');
 const LocalPassport = include('auth/Passport');
+const {processError} = include('ui/error-handler');
 
 module.exports.getLogin = function(req, res) {
     return res.render('login');
@@ -17,7 +17,7 @@ module.exports.postRegister = async function(req, res) {
     const email = req.body.email;
 
     let successMessage;
-    let userErrors = [];
+    let userErrors;
 
     try {
         const userLogin = new UserLogin({ email });
@@ -26,31 +26,16 @@ module.exports.postRegister = async function(req, res) {
         await userLogin.load();
 
         if ( userLogin.id ) {
-            throw new UserException('register.user_exists');
+            throw Translation.getMessage('register.error_user_exists');
         }
 
         const savedOk = await userLogin.save();
 
         if ( savedOk ) {
-            successMessage = UserText.getMessage('register.success');
+            successMessage = await Translation.getMessage('register.success').catch(err => err);
         }
     } catch (err) {
-        if ( typeof(err) !== 'object' || err.constructor.name !== 'Array' ) {
-            err = [ err ];
-        }
-
-        err.forEach(e => {
-            if ( typeof(e) === 'object' && e.constructor.name === 'UserException' ) {
-                userErrors.push(e.getMessage());
-            } else {
-                console.log(e);
-            }
-        });
-
-        // show general error if something unexpected happened
-        if ( !userErrors.length ) {
-            userErrors.push(new UserException('general').getMessage());
-        }
+        userErrors = await processError(err);
     }
 
     return res.render('main/register', {
@@ -60,16 +45,18 @@ module.exports.postRegister = async function(req, res) {
     });
 }
 
-module.exports.postLogin = function(req, res, next) {
+module.exports.postLogin = async function(req, res, next) {
     const passport = LocalPassport.getInstance();
 
-    return passport.authenticate('local', (err, user, info) => {
+    return passport.authenticate('local', async (err, user, info) => {
         if (err) {
             return next(err);
-        } else if ( ! user ) {
+        } else if ( !user ) {
+            const loginVerifyError = await Translation.getMessage('login.error_verify').catch(err => err);
+
             return res.render('login', {
                 formData: req.body,
-                error: new UserException('login.verify').getMessage()
+                error: loginVerifyError
             });
         } else {
             req.login(user, function(err) {

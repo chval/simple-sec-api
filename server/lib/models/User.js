@@ -1,7 +1,6 @@
 'use strict';
 
-const dbConnect = include('knex');
-const UserException = include('ui/UserException');
+const KnexConnect = include('KnexConnect');
 
 class User {
     constructor(data) {
@@ -33,7 +32,7 @@ class User {
     async load() {
         if ( this._loaded ) return;
 
-        const db = await dbConnect.getInstance();
+        const db = KnexConnect.getInstance();
         const users = await db('user').where('id', this.id);
         const [user] = users;
 
@@ -51,7 +50,7 @@ class User {
     async save() {
         await this.load();
 
-        const db = await dbConnect.getInstance();
+        const db = KnexConnect.getInstance();
         let savedOk;
 
         if ( !this.id ) {

@@ -1,8 +1,8 @@
 'use strict';
 
-const dbConnect = include('knex');
+const KnexConnect = include('KnexConnect');
 const Password = include('auth/Password');
-const UserException = include('ui/UserException');
+const Translation = include('ui/Translation');
 
 class UserLogin {
     constructor(data) {
@@ -27,7 +27,7 @@ class UserLogin {
         if ( !data.hasOwnProperty('email') ) {
             throw 'Missed required data key: email';
         } else if ( !data.email ) {
-            errors.push( new UserException('register.required.email') );
+            errors.push( Translation.getMessage('register.require_email') );
         }
 
         return errors;
@@ -36,7 +36,7 @@ class UserLogin {
     async load() {
         if ( this._loaded ) return;
 
-        const db = await dbConnect.getInstance();
+        const db = KnexConnect.getInstance();
         const userLogins = await db('user_login').where('email', this.email);
         const [userLogin] = userLogins;
 
@@ -54,7 +54,7 @@ class UserLogin {
     async save() {
         await this.load();
 
-        const db = await dbConnect.getInstance();
+        const db = KnexConnect.getInstance();
         let savedOk;
 
         await db.transaction(async (trx) => {
@@ -85,7 +85,7 @@ class UserLogin {
 
     setPassword(password) {
         if ( !password ) {
-            throw new UserException('register.required.password');
+            throw Translation.getMessage('register.require_password');
         }
 
         this.password = new Password(password).encrypt();
