@@ -38,15 +38,17 @@ class UserLogin {
 
         const db = await dbConnect.getInstance();
         const userLogins = await db('user_login').where('email', this.email);
+        const [userLogin] = userLogins;
 
-        if ( userLogins.length ) {
+        if ( userLogin ) {
 
-            this.id = userLogins[0].id;
-            this.user_id = userLogins[0].user_id;
-            this.password = userLogins[0].password;
+            this.id = userLogin.id;
+            this.user_id = userLogin.user_id;
+            this.password = userLogin.password;
         }
 
         this._loaded = true;
+        return this._loaded;
     }
 
     async save() {

@@ -13,9 +13,16 @@ module.exports.instance = new LocalStrategy(
     // verify callback
     async (email, password, done) => {
         const userLogin = new UserLogin({ email });
-        await userLogin.load();
+        const isLoaded = await userLogin.load().catch(err => {
+            console.error(err);
+            return false;
+        });
 
-        if ( ! userLogin.id ) {
+        if ( !isLoaded ) {
+            return done(null, false);
+        }
+
+        if ( !userLogin.id ) {
             return done(null, false);
         }
 
