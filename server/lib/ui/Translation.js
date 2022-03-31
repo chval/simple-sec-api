@@ -13,27 +13,35 @@ class Translation {
             .then(obj => {
                 if ( !obj ) {
                     console.error(`No '${codeName}' key found in '${collectionName}' collection`);
-                    resolve(`${code}`);
+                    return resolve(`${code}`);
                 }
 
                 let key = '_value';
 
                 const defaultKey = 'en' + key;
-                let val = obj[defaultKey];
+                let val = defaultKey in obj ? obj[defaultKey] : undefined;
 
                 if ( lang ) {
                     const langKey = lang + key;
 
-                    if ( obj[langKey] ) {
+                    if ( langKey in obj && obj[langKey] ) {
                         val = obj[langKey];
+                    } else {
+                        console.error(`No ${lang} translation found for ${code}`);
                     }
                 }
 
-                val ||= codeName;
+                if ( !val ) {
+                    console.error(`No text for ${code}`);
+                    val = code;
+                }
 
                 resolve(val);
             })
-            .catch(err => reject(err));
+            .catch(err => {
+                console.error(err);
+                reject('Oops! Something went wrong!');
+            });
         });
     }
 }

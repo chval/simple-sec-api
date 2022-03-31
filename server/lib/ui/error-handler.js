@@ -2,33 +2,43 @@
 
 const Translation = include('ui/Translation');
 
-module.exports.processError = async function(err) {
-    const userErrors = [];
-
-    if ( typeof(err) !== 'object' || err.constructor.name !== 'Array' ) {
-        err = [ err ];
+function catchError(error) {
+    if ( typeof(error) === 'object' && error instanceof Error ) {
+        console.error(error);
+        return 'The application has encountered unexpected error';
     }
 
-    for ( let i = 0; i < err.length; i++ ) {
-        const e = err[i];
+    return error;
+}
 
-        if ( typeof(e) === 'object' && typeof(e.then) === 'function' ) {
-            userErrors.push(await e.catch(err => {
-                console.error(err);
-                return 'Oops! Something went wrong!';
-            }));
+async function formatErrors(errors) {
+    const userErrors = [];
+
+    if ( typeof(errors) !== 'object' || errors.constructor.name !== 'Array' ) {
+        errors = [ errors ];
+    }
+
+    for ( let i = 0; i < errors.length; i++ ) {
+        const err = errors[i];
+
+        if ( typeof(err) === 'object' && typeof(err.then) === 'function' ) {
+            userErrors.push(await err.catch(e => catchError(e)));
         } else {
-            console.error(e);
+            console.error(err);
         }
     }
 
     // show general error if something unexpected happened
     if ( !userErrors.length ) {
-        userErrors.push(await Translation.getMessage('errors.general').catch(err => {
-            console.log(err);
-            return 'The application has encountered an unknown error';
-        }));
+        const errMsg = await Translation.getMessage('errors.general').catch(e => catchError(e));
+
+        userErrors.push(errMsg);
     }
 
     return userErrors;
 }
+
+module.exports = {
+    catchError,
+    formatErrors
+};
