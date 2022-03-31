@@ -3,7 +3,7 @@
 const UserLogin = include('models/UserLogin');
 const Translation = include('ui/Translation');
 const LocalPassport = include('auth/Passport');
-const {processError} = include('ui/error-handler');
+const {formatErrors, catchError} = include('ui/error-handler');
 
 module.exports.getLogin = function(req, res) {
     return res.render('login');
@@ -32,10 +32,10 @@ module.exports.postRegister = async function(req, res) {
         const savedOk = await userLogin.save();
 
         if ( savedOk ) {
-            successMessage = await Translation.getMessage('register.success').catch(err => err);
+            successMessage = await Translation.getMessage('register.success').catch(err => catchError(err));
         }
     } catch (err) {
-        userErrors = await processError(err);
+        userErrors = await formatErrors(err);
     }
 
     return res.render('main/register', {
@@ -52,7 +52,7 @@ module.exports.postLogin = async function(req, res, next) {
         if (err) {
             return next(err);
         } else if ( !user ) {
-            const loginVerifyError = await Translation.getMessage('login.error_verify').catch(err => err);
+            const loginVerifyError = await Translation.getMessage('login.error_verify').catch(err => catchError(err));
 
             return res.render('login', {
                 formData: req.body,
