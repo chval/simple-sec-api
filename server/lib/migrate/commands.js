@@ -5,7 +5,7 @@ const readLine = require('readline');
 const path = require('path');
 
 const settings = include('settings');
-const fileDateHelper = include('migrate/sql-file-date');
+const fileDateHelper = include('migrate/file-date');
 
 const KnexConnect = include('KnexConnect');
 
