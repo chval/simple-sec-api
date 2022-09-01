@@ -13,7 +13,7 @@ const KnexConnect = include('KnexConnect');
 * Get all sql migration files that match pattern
 */
 function _getAllFiles() {
-    const dir = settings.DB_SQL_DIR;
+    const dir = settings.MIGRATION_FILES_DIR_SQL;
 
     try {
         fs.accessSync(dir, fs.constants.R_OK);
@@ -66,7 +66,7 @@ async function _getNotMigrated() {
 
     let migratedFiles = {};
     let db = KnexConnect.getInstance();
-    let migrObjs = await db.select('file').table(settings.DB_MIGRATIONS_TABLE);
+    let migrObjs = await db.select('file').table(settings.MIGRATIONS_STORAGE_NAME);
 
     migrObjs.forEach(mo => {
         migratedFiles[mo.file] = 1;
@@ -89,7 +89,7 @@ async function _getNotMigrated() {
 * Touch new sql migration file
 */
 function newFile(justName) {
-    const dir = settings.DB_SQL_DIR;
+    const dir = settings.MIGRATION_FILES_DIR_SQL;
 
     try {
         fs.accessSync(dir, fs.constants.W_OK);
@@ -126,7 +126,7 @@ async function update(files) {
 
     for ( let i = 0; i < files.length; i++ ) {
         let fileName = files[i];
-        let resFileName = path.resolve(settings.DB_SQL_DIR, fileName);
+        let resFileName = path.resolve(settings.MIGRATION_FILES_DIR_SQL, fileName);
 
         let queries = await _readFile(resFileName);
 
@@ -136,7 +136,7 @@ async function update(files) {
                     await trx.raw(queries[i]);
                 }
 
-                await trx(settings.DB_MIGRATIONS_TABLE).insert({file: fileName});
+                await trx(settings.MIGRATIONS_STORAGE_NAME).insert({file: fileName});
 
                 doneFiles.push(fileName);
             });
@@ -161,7 +161,7 @@ async function list() {
 */
 async function last() {
     let db = KnexConnect.getInstance();
-    let migrObj = await db.select('file').from(settings.DB_MIGRATIONS_TABLE).orderBy('id', 'desc').limit(1);
+    let migrObj = await db.select('file').from(settings.MIGRATIONS_STORAGE_NAME).orderBy('id', 'desc').limit(1);
 
     return migrObj.length ? migrObj[0].file : null;
 }
@@ -177,7 +177,7 @@ async function drop(files) {
         let fileName = files[i];
 
         try {
-            let success = await db(settings.DB_MIGRATIONS_TABLE).where('file', fileName).del();
+            let success = await db(settings.MIGRATIONS_STORAGE_NAME).where('file', fileName).del();
 
             if ( success ) {
                 doneFiles.push(fileName);

@@ -53,7 +53,7 @@ function startApp(knex) {
         },
         store: new knexSessionStore({
             knex: knex,
-            tablename: settings.DB_SESSIONS_TABLE,
+            tablename: settings.SQL_DB_SESSIONS_TABLE,
             createtable: true,
             clearInterval: 1000 * 60 * 60
         })
