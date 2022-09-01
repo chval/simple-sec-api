@@ -27,7 +27,7 @@ class UserLogin {
         if ( !data.hasOwnProperty('email') ) {
             throw 'Missed required data key: email';
         } else if ( !data.email ) {
-            errors.push( Translation.getMessage('register.require_email') );
+            errors.push( Translation.getMessage('errors.email_required') );
         }
 
         return errors;
@@ -85,7 +85,7 @@ class UserLogin {
 
     setPassword(password) {
         if ( !password ) {
-            throw Translation.getMessage('register.require_password');
+            throw Translation.getMessage('errors.password_required');
         }
 
         this.password = new Password(password).encrypt();

@@ -16,7 +16,7 @@ class Translation {
                     return resolve(`${code}`);
                 }
 
-                let key = '_value';
+                const key = '_value';
 
                 const defaultKey = 'en' + key;
                 let val = defaultKey in obj ? obj[defaultKey] : undefined;

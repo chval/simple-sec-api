@@ -26,13 +26,13 @@ module.exports.postRegister = async function(req, res) {
         await userLogin.load();
 
         if ( userLogin.id ) {
-            throw Translation.getMessage('register.error_user_exists');
+            throw Translation.getMessage('errors.user_exists');
         }
 
         const savedOk = await userLogin.save();
 
         if ( savedOk ) {
-            successMessage = await Translation.getMessage('register.success').catch(err => catchError(err));
+            successMessage = await Translation.getMessage('messages.registration_success').catch(err => catchError(err));
         }
     } catch (err) {
         userErrors = await formatErrors(err);
@@ -52,7 +52,7 @@ module.exports.postLogin = async function(req, res, next) {
         if (err) {
             return next(err);
         } else if ( !user ) {
-            const loginVerifyError = await Translation.getMessage('login.error_verify').catch(err => catchError(err));
+            const loginVerifyError = await Translation.getMessage('errors.login_unverified').catch(err => catchError(err));
 
             return res.render('login', {
                 formData: req.body,
