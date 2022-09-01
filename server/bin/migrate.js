@@ -1,46 +1,38 @@
+#!/usr/bin/env node
 'use strict';
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
+// load config variables from .env
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '/../.env') });
+
 global.include = function(path) {
     return require(__dirname + '/../lib/' + path);
 }
 
-const KnexConnect = include('KnexConnect');
-const commands = include('migrate/commands');
+const opts = initYargs();
+const command = opts._[0];
 
-(async () => {
+const actionModule = include('migrate/Action');
+const actionClass = opts.type === 'sql' ? actionModule.SqlMigrateAction : actionModule.MongoMigrateAction;
 
-    // init database
-    await KnexConnect.init()
-        .catch((err) => {
-            console.error(err);
-            process.exit(1);
-        });
+processCommand(command).then(function() {
+    process.exit(0);
+}).catch(err => {
+    console.log(err);
+    process.exit(1);
+});
 
-    const opts = await initYargs();
-
-    const command = opts._[0];
+async function processCommand(command) {
+    const actionInstance = new actionClass();
 
     if ( command === 'new' ) {
-        let newFileName = commands.newFile(opts.name);
-
-        if ( !newFileName ) {
-            process.exit(1);
-        } else {
-            console.log(`Created file: ${newFileName}`);
-        }
-    } else if ( command === 'up' ) {
-        let files = await commands.update(opts.filename);
-
-        console.log('Migrated ' + files.length + ' file(s):');
-
-        for ( let f of files ) {
-            console.log(`\t- ${f}`);
-        }
+        const newFileName = await actionInstance.newFile(opts.name);
+        console.log(`Created file: ${newFileName}`);
     } else if ( command === 'list' ) {
-        let files = await commands.list();
+        const files = await actionInstance.getNotMigratedFilenames();
 
         if ( !files.length ) {
             console.log('Empty list');
@@ -51,8 +43,15 @@ const commands = include('migrate/commands');
                 console.log(`\t- ${f}`);
             }
         }
+    } else if ( command === 'up' ) {
+        const files = await actionInstance.migrate(opts.filename);
+        console.log('Migrated ' + files.length + ' file(s):');
+
+        for ( let f of files ) {
+            console.log(`\t- ${f}`);
+        }
     } else if ( command === 'last' ) {
-        let file = await commands.last();
+        const file = await actionInstance.lastFilename();
 
         if ( !file ) {
             console.log('No one file was migrated yet');
@@ -60,45 +59,53 @@ const commands = include('migrate/commands');
             console.log('Last migrated file was: ' + file);
         }
     } else if ( command === 'drop' ) {
-        let files = await commands.drop(opts.filename);
+        const files = await actionInstance.dropFileRecord(opts.filename);
 
         if ( !files.length ) {
-            console.log("Couldn't drop any file(s)");
-            process.exit(1);
+            console.log("Couldn't drop any file record(s)");
         } else {
-            console.log('Dropped files list:');
+            console.log('Dropped record(s) for:');
 
             for ( let f of files ) {
                 console.log(`\t- ${f}`);
             }
         }
+    } else {
+        console.error(`Unknown command: ${command}`);
     }
-})().then(function() {
-    process.exit(0);
-});
+}
 
-async function initYargs() {
-    return await yargs(hideBin(process.argv))
+function initYargs() {
+    return yargs(hideBin(process.argv))
+    .option('t', {
+        alias: 'type',
+        demandOption: true,
+        default: 'sql',
+        describe: 'database type for migration',
+        type: 'string',
+        choices: ['sql', 'mongo']
+    })
     .command('new <name>', 'create new migration file', (yargs) => {
         yargs.positional('name', {
-            describe: 'migration file name that will be created',
+            describe: 'name of new migration',
             type: 'string'
         })
     })
-    .command('up [filename..]', 'execute all/selected not yet migrated file(s)', (yargs) => {
+    .command('list', 'get all not migrated file(s) list')
+    .command('up [filename..]', 'migrate selected or not migrated file(s)', (yargs) => {
         yargs.positional('filename', {
-            describe: 'migration file name that already exists',
+            describe: 'filename(s) to migrate',
             type: 'string',
         })
     })
-    .command('list', 'get all not yet migrated file(s) list')
     .command('last', 'show last migrated file')
-    .command('drop <filename..>', 'remove selected migraion file(s) from db migrations table', (yargs) => {
+    .command('drop <filename..>', 'remove selected file(s) from migrated', (yargs) => {
         yargs.positional('filename', {
-            describe: 'migration file(s) that will be dropped',
+            describe: 'filename(s) to drop record(s) for',
             type: 'string',
         })
     })
     .demandCommand(1)
+    .help()
     .argv;
 }
