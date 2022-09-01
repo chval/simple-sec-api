@@ -5,6 +5,7 @@ const db_dir = 'db/';
 const settings = {
     DB_DIR: db_dir,
     MIGRATION_FILES_DIR_SQL: db_dir + 'sql/',
+    MIGRATION_FILES_DIR_MONGO: db_dir + 'mongo/',
     SQL_DB: {
         client: 'sqlite3',
         connection: {
