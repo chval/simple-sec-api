@@ -11,27 +11,27 @@ class KnexConnect {
     static init() {
         return new Promise((resolve, reject) => {
             if ( this.db !== null ) {
-                reject(this.constructor.name + " can be initialized only once");
+                reject(this.constructor.name + ' can be initialized only once');
             }
 
-            const db = knex(settings.DB_CONN);
+            const db = knex(settings.SQL_DB);
 
-            db.schema.hasTable(settings.DB_MIGRATIONS_TABLE).then(tExists => {
+            db.schema.hasTable(settings.MIGRATIONS_STORAGE_NAME).then(tExists => {
                 if ( tExists ) {
-                    return db;
+                    resolve(this.db = db);
                 }
 
-                db.schema.createTable(settings.DB_MIGRATIONS_TABLE, t => {
+                db.schema.createTable(settings.MIGRATIONS_STORAGE_NAME, t => {
                     t.increments('id').primary();
                     t.string('file', 256).notNullable();
-                    t.datetime('created_at').notNullable().defaultTo(this.db.fn.now());
+                    t.datetime('created_at').notNullable().defaultTo(db.fn.now());
 
                     t.unique('file');
                 })
+                .then(() => {
+                    resolve(this.db = db);
+                })
                 .catch(err => reject(err));
-            }).then((db) => {
-                this.db = db;
-                resolve(this.db);
             })
             .catch(err => reject(err));
         });
