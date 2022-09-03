@@ -62,6 +62,18 @@ module.exports.postLogin = async function(req, res, next) {
             req.login(user, function(err) {
                 if (err) return next(err);
 
+                if ( req.body.remember_me === 'on' ) {
+                    const maxAge = parseInt(process.env.SEC_API_SESSION_TTL_MS);
+
+                    if ( isNaN(maxAge) ) {
+                        return next(Translation.getMessage('errors.not_implemented'));
+                    }
+
+                    req.session.cookie.maxAge = maxAge;
+                } else {
+                    req.session.cookie.expires = false;
+                }
+
                 return res.redirect('/');
             });
         }
