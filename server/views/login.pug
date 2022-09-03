@@ -52,6 +52,9 @@ block body_content
             div.form-floating
                 input#user_password.form-control(type='password' name='password' placeholder='Password')
                 label(for='user_password') Password
+            div.col-6.form-check.offset-3
+                input#remember_me.form-check-input(type='checkbox' name='remember_me')
+                label.form-check-label(for='remember_me') Remember me
             button.w-100.btn.btn-lg.btn-primary(type='submit') Sign in
             if error
                 small.text-danger= error
