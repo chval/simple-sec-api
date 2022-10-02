@@ -2,3 +2,4 @@ node_modules/
 *.code-workspace
 .env
 *.sqlite3
+**/.DS_store
