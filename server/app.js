@@ -32,10 +32,21 @@ app.use('/js', express.static(path.join(__dirname, '../public/js')));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '/views'));
 
-Promise.all([KnexConnect.init(), MongoConnect.init()])
+Promise.allSettled([KnexConnect.init(), MongoConnect.init()])
     .then(dbs => {
-        const [knex, mongo] = dbs;
-        startApp(knex);
+        const [pKnex, pMongo] = dbs;
+
+        if ( pKnex.status !== 'fulfilled' ) {
+            throw pKnex.reason;
+        }
+
+        if ( pMongo.status !== 'fulfilled' ) {
+
+            // connection to mongodb is not critical
+            console.error('mongodb: ' + pMongo.reason.message);
+        }
+
+        startApp(pKnex.value);
     })
     .catch(err => {
         console.error(err);

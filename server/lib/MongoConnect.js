@@ -14,7 +14,7 @@ class MongoConnect {
                 reject(this.constructor.name + ' can be initialized only once');
             }
 
-            const client = new MongoClient(process.env.MONGODB_URI);
+            const client = new MongoClient(process.env.MONGODB_URI, {serverSelectionTimeoutMS: 3000});
 
             client.connect().then(() => {
                 const db = client.db();

@@ -9,6 +9,8 @@ class Translation {
 
             const db = MongoConnect.getInstance();
 
+            if ( !db ) return resolve(code);
+
             db.collection(collectionName).findOne({key: codeName})
             .then(obj => {
                 if ( !obj ) {
