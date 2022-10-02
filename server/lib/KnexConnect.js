@@ -14,7 +14,13 @@ class KnexConnect {
                 reject(this.constructor.name + ' can be initialized only once');
             }
 
-            const db = knex(settings.SQL_DB);
+            const db = knex({
+                client: 'sqlite3',
+                connection: {
+                    filename: settings.SQLITE_DB
+                },
+                useNullAsDefault: true
+            });
 
             db.schema.hasTable(settings.MIGRATIONS_STORAGE_NAME).then(tExists => {
                 if ( tExists ) {
