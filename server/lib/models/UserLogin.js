@@ -6,18 +6,14 @@ const Translation = include('ui/Translation');
 
 class UserLogin {
     constructor(data) {
-        try {
-            const errors = this.validate(data);
-            if ( errors.length ) throw errors;
-        } catch(err) {
-            throw err;
-        }
+        const errors = this.validate(data);
+        if (errors) throw errors;
 
         this.email = data.email;
     }
 
     validate(data) {
-        let errors = [];
+        let errors = new Map();
 
         if ( !(data && typeof(data) === 'object') ) {
             throw 'Missed or invalid format of required argument: data';
@@ -27,18 +23,17 @@ class UserLogin {
         if ( !data.hasOwnProperty('email') ) {
             throw 'Missed required data key: email';
         } else if ( !data.email ) {
-            errors.push( Translation.getMessage('errors.email_required') );
+            errors.set('email', Translation.getMessage('errors.email_required'));
         }
 
-        return errors;
+        return errors.size ? errors : null;
     }
 
     async load() {
-        if ( this._loaded ) return;
+        if ( this.id ) return;
 
         const db = KnexConnect.getInstance();
-        const userLogins = await db('user_login').where('email', this.email);
-        const [userLogin] = userLogins;
+        const [userLogin] = await db('user_login').where('email', this.email);
 
         if ( userLogin ) {
 
@@ -47,36 +42,29 @@ class UserLogin {
             this.password = userLogin.password;
         }
 
-        this._loaded = true;
-        return this._loaded;
+        return this.id;
     }
 
     async save() {
-        await this.load();
+        const isExists = await this.load();
 
         const db = KnexConnect.getInstance();
         let savedOk;
 
         await db.transaction(async (trx) => {
 
-            if ( !this.user_id ) {
-                const insertUserIds = await trx('user').insert({ id: null });
-                this.user_id = insertUserIds[0];
+            if ( !isExists ) {
+                [this.user_id] = await trx('user').insert({ id: null });
 
-                const insertUserLoginIds = await trx('user_login').insert({
+                [savedOk] = await trx('user_login').insert({
                     user_id: this.user_id,
                     email: this.email,
                     password: this.password
                 });
-
-                savedOk = insertUserLoginIds[0];
             } else {
-
-                const updatedCount = await trx('user_login').where({ id: this.id }).update({
+                savedOk = await trx('user_login').where({ id: this.id }).update({
                     password: this.password
                 });
-
-                savedOk = updatedCount;
             }
         });
 

@@ -43,6 +43,8 @@ block body_content
 
     body.text-center
     main.form-signin
+        if successMessage
+            small.text-success= successMessage
         form(method='post' action='/auth/login')
             h1.h3.mb-3.fw-normal Sign in to proceed
             - formData ||= {};
@@ -56,7 +58,7 @@ block body_content
                 input#remember_me.form-check-input(type='checkbox' name='remember_me')
                 label.form-check-label(for='remember_me') Remember me
             button.w-100.btn.btn-lg.btn-primary(type='submit') Sign in
-            if error
-                small.text-danger= error
+            if errorData
+                small.text-danger= errorData
                 br
             small Don't have an account? Please #[a(href='/auth/register') register]

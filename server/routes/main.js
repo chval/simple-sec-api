@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const Translation = include('ui/Translation');
 const KnexConnect = include('KnexConnect');
 const LocalPassport = include('auth/Passport');
 const mainController = include('controllers/main');
@@ -19,6 +20,24 @@ router.use(bodyParser.json());
 const passport = new LocalPassport();
 router.use(passport.initialize());
 router.use(passport.session());
+
+router.use((err, req, res, next) => {
+    if ( err ) {
+        console.error(err);
+        req.logout();
+
+        let errorMessage;
+
+        return Translation.getMessage('errors.general')
+            .then(err => errorMessage = err)
+            .catch(err => errorMessage = '🙁')
+            .finally(() => {
+                return res.render('main/500', { errorMessage });
+        });
+    }
+
+    next();
+});
 
 router.use(async (req, res, next) => {
     const isAuthenticated = req.isAuthenticated();

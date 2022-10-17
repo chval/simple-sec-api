@@ -4,11 +4,7 @@ const KnexConnect = include('KnexConnect');
 
 class User {
     constructor(data) {
-        try {
-            this.validate(data);
-        } catch(err) {
-            throw err;
-        }
+        this.validate(data);
 
         this.id = data.id;
         this.first_name = data.first_name;
@@ -30,50 +26,36 @@ class User {
     }
 
     async load() {
-        if ( this._loaded ) return;
-
         const db = KnexConnect.getInstance();
-        const users = await db('user').where('id', this.id);
-        const [user] = users;
+        const [user] = await db('user').where('id', this.id);
 
         if ( user ) {
 
             this.id = user.id;
-            this.first_name = user.first_name;
-            this.last_name = user.last_name;
+
+            // overwrite only attributes not set in constructor
+            this.first_name = this.first_name ?? user.first_name;
+            this.last_name = this.last_name ?? user.last_name;
+        } else {
+            this.id = undefined;
         }
 
-        this._loaded = true;
-        return this._loaded;
+        return this.id;
     }
 
     async save() {
-        await this.load();
+        const isExists = await this.load();
 
-        const db = KnexConnect.getInstance();
-        let savedOk;
-
-        if ( !this.id ) {
-            const insertIds = await db('user').insert({
-                id: null,
-                first_name: this.first_name,
-                last_name: this.last_name
-            });
-
-            this.id = insertIds[0];
-
-            savedOk = this.id;
-        } else {
-
-            const updatedCount = await db('user').where({ id: this.id }).update({
-                first_name: this.first_name,
-                last_name: this.last_name
-            });
-
-            savedOk = updatedCount;
+        if ( !isExists ) {
+            throw "Can't create a new User without login"
         }
 
-        return savedOk;
+        const db = KnexConnect.getInstance();
+
+        return await db('user').where({ id: this.id }).update({
+            first_name: this.first_name,
+            last_name: this.last_name
+        });
     }
 }
 
