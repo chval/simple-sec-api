@@ -1,0 +1,18 @@
+extends base.pug
+block body_content
+    body
+        nav.navbar.navbar-expand-lg.navbar-light.bg-light
+            div.container
+                a.navbar-brand(href="/admin") SecApi&nbsp;
+                    small.fw-lighter admin
+                button.navbar-toggler(type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation")
+                    span.navbar-toggler-icon
+                div.collapse.navbar-collapse.justify-content-between(id="navbarSupportedContent")
+                    ul.navbar-nav.mx-auto.text-md-center.text-left
+                        li.nav-item
+                            a.nav-link(href="/profile") #{myName}
+                    ul.nav.navbar-nav.flex-row.justify-content-md-center.justify-content-start.flex-nowrap
+                        li.nav-item
+                            a.btn.btn-sm.btn-outline-secondary(href='/auth/logout' role='button') Logout
+        block main_content
+    script(src='/js/layouts.main.js')

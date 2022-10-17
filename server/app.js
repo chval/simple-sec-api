@@ -14,6 +14,7 @@ global.include = function(path) {
 
 const mainRouter = require('./routes/main');
 const authRouter = require('./routes/auth');
+const adminRouter = require('./routes/admin');
 
 const settings = include('settings');
 const KnexConnect = include('KnexConnect');
@@ -72,6 +73,7 @@ function startApp(knex) {
     // add routes usage here
     app.use('/', mainRouter);
     app.use('/auth', authRouter);
+    app.use('/admin', adminRouter);
 
     // start listening
     app.listen(port, host, () => {
