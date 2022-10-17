@@ -12,30 +12,25 @@ function catchError(error) {
 }
 
 async function formatErrors(errors) {
-    const userErrors = [];
+    if ( typeof(errors) === 'object' ) {
+        if ( errors instanceof Map ) {
 
-    if ( typeof(errors) !== 'object' || errors.constructor.name !== 'Array' ) {
-        errors = [ errors ];
-    }
+            // resolve all promises with user errors
+            for ( const [key, error] of errors ) {
+                errors.set(key, await error.catch(e => catchError(e)));
+            }
 
-    for ( let i = 0; i < errors.length; i++ ) {
-        const err = errors[i];
+            return errors;
+        } else if ( typeof(errors.then) === 'function' ) {
 
-        if ( typeof(err) === 'object' && typeof(err.then) === 'function' ) {
-            userErrors.push(await err.catch(e => catchError(e)));
-        } else {
-            console.error(err);
+            // resolve user error promise
+            return await errors.catch(e => catchError(e));
         }
     }
 
-    // show general error if something unexpected happened
-    if ( !userErrors.length ) {
-        const errMsg = await Translation.getMessage('errors.general').catch(e => catchError(e));
-
-        userErrors.push(errMsg);
-    }
-
-    return userErrors;
+    // don't show this internal error to user
+    console.error(errors);
+    return await Translation.getMessage('errors.general').catch(e => catchError(e));
 }
 
 module.exports = {

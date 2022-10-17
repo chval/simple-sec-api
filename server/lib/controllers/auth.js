@@ -3,21 +3,27 @@
 const UserLogin = include('models/UserLogin');
 const Translation = include('ui/Translation');
 const LocalPassport = include('auth/Passport');
-const {formatErrors, catchError} = include('ui/error-handler');
+const {formatErrors} = include('ui/error-handler');
 
 module.exports.getLogin = function(req, res) {
+    res.locals = req.session.flash;
+    delete req.session.flash;
+
     return res.render('login');
 }
 
 module.exports.getRegister = function(req, res) {
+    if ( req.isAuthenticated() ) {
+        return res.redirect('/');
+    }
+
     res.render('main/register');
 }
 
-module.exports.postRegister = async function(req, res) {
+module.exports.postRegister = async function(req, res, next) {
     const email = req.body.email;
 
     let successMessage;
-    let userErrors;
 
     try {
         const userLogin = new UserLogin({ email });
@@ -32,32 +38,26 @@ module.exports.postRegister = async function(req, res) {
         const savedOk = await userLogin.save();
 
         if ( savedOk ) {
-            successMessage = await Translation.getMessage('messages.registration_success').catch(err => catchError(err));
+            successMessage = await Translation.getMessage('messages.registration_success').catch(err => '😊');
         }
     } catch (err) {
-        userErrors = await formatErrors(err);
+        return next(err);
     }
 
-    return res.render('main/register', {
-        formData: req.body,
-        errors: userErrors,
-        success: successMessage
-    });
+    req.session.flash = {
+        successMessage,
+        formData: { email }
+    }
+
+    res.redirect('/auth/login');
 }
 
-module.exports.postLogin = async function(req, res, next) {
+module.exports.postLogin = function(req, res, next) {
     const passport = LocalPassport.getInstance();
 
-    return passport.authenticate('local', async (err, user, info) => {
-        if (err) {
-            return next(err);
-        } else if ( !user ) {
-            const loginVerifyError = await Translation.getMessage('errors.login_unverified').catch(err => catchError(err));
-
-            return res.render('login', {
-                formData: req.body,
-                error: loginVerifyError
-            });
+    return passport.authenticate('local', (err, user, info) => {
+        if ( err || !user ) {
+            return next(err || Translation.getMessage('errors.login_unverified'));
         } else {
             req.login(user, function(err) {
                 if (err) return next(err);

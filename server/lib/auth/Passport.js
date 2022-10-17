@@ -17,14 +17,17 @@ class LocalPassport {
 
         passport.deserializeUser((userId, done) => {
             process.nextTick(async () => {
-                const user = new User({ id: userId });
-                const isLoaded = await user.load().catch(err => {
-                    console.error(err);
-                    return false;
-                });
+                let user;
 
-                if ( !isLoaded ) {
-                    return done(null, false);
+                try {
+                    user = new User({ id: userId });
+                    const isExists = await user.load();
+
+                    if ( !isExists ) {
+                        return done(null, false);
+                    }
+                } catch(err) {
+                    return done(err, false);
                 }
 
                 done(null, user);
