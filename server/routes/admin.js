@@ -3,15 +3,20 @@
 const express = require('express');
 
 const adminController = include('controllers/admin');
+const UserAdmin = include('models/UserAdmin');
 
 const router = express.Router();
 
-router.use((req, res, next) => {
-    const passport = req.session.passport;
+router.use(async (req, res, next) => {
+    const userId = req.session.passport.user;
 
-    //if ( !passport.is_admin ) {
-    //    return res.redirect('/');
-    //}
+    const userAdmin = new UserAdmin({ user_id: userId });
+
+    await userAdmin.load();
+
+    if ( !userAdmin.id ) {
+       return res.redirect('/');
+    }
 
     next();
 });
