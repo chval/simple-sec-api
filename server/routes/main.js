@@ -21,6 +21,7 @@ const passport = new LocalPassport();
 router.use(passport.initialize());
 router.use(passport.session());
 
+// Catch all unexpected errors here
 router.use((err, req, res, next) => {
     if ( err ) {
         console.error(err);
