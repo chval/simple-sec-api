@@ -3,7 +3,6 @@
 const UserLogin = include('models/UserLogin');
 const Translation = include('ui/Translation');
 const LocalPassport = include('auth/Passport');
-const {formatErrors} = include('ui/error-handler');
 
 module.exports.getLogin = function(req, res) {
     res.locals = req.session.flash;
