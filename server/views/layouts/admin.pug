@@ -1,18 +1,22 @@
 extends base.pug
 block body_content
     body
-        nav.navbar.navbar-expand-lg.navbar-light.bg-light
+        nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
             div.container
                 a.navbar-brand(href="/admin") SecApi&nbsp;
                     small.fw-lighter admin
-                button.navbar-toggler(type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation")
+                button.navbar-toggler(type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation")
                     span.navbar-toggler-icon
-                div.collapse.navbar-collapse.justify-content-between(id="navbarSupportedContent")
-                    ul.navbar-nav.mx-auto.text-md-center.text-left
+                #navbarMenu.collapse.navbar-collapse.justify-content-between
+                    ul.navbar-nav.me-auto.mb-2.mb-lg-0
                         li.nav-item
-                            a.nav-link(href="/profile") #{myName}
-                    ul.nav.navbar-nav.flex-row.justify-content-md-center.justify-content-start.flex-nowrap
-                        li.nav-item
-                            a.btn.btn-sm.btn-outline-secondary(href='/auth/logout' role='button') Logout
+                            a.nav-link(href='/admin/users') Users
+                    div.d-flex.align-items-center
+                        ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                            li.nav-item.dropdown
+                                a.nav-link.dropdown-toggle(id='navbarDropdownProfileLink' role='button' data-bs-toggle='dropdown' aria-expanded='false' href='/profile') #{myEmail}
+                                ul.dropdown-menu.dropdown-menu-end(aria-labelledby='navbarDropdownProfileLink')
+                                    li
+                                        a.dropdown-item(href='/auth/logout') Logout
         block main_content
     script(src='/js/layouts.main.js')

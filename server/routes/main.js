@@ -52,9 +52,9 @@ router.use(async (req, res, next) => {
 
     if ( isAuthenticated ) {
         const db = KnexConnect.getInstance();
-        const [userLogin] = await db('user_login').where('id', req.session.passport.user);
+        const [userLogin] = await db('user_login').where('user_id', req.session.passport.user);
 
-        res.locals.myName = userLogin.email;
+        res.locals.myEmail = userLogin.email;
     }
 
     next();
