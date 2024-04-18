@@ -59,6 +59,7 @@ block body_content
                 label.form-check-label(for='remember_me') Remember me
             button.w-100.btn.btn-lg.btn-primary(type='submit') Sign in
             if errorData
-                small.text-danger= errorData
+                - const errMsg=errorData instanceof Map ? [...errorData.values()].join("\n") : errorData
+                small.text-danger= errMsg
                 br
             small Don't have an account? Please #[a(href='/auth/register') register]

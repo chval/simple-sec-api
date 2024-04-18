@@ -6,37 +6,33 @@ const Translation = include('ui/Translation');
 
 class UserLogin {
     constructor(data) {
-        const errors = this.validate(data);
-        if (errors) throw errors;
-
-        this.email = data.email;
-    }
-
-    validate(data) {
-        let errors = new Map();
-
-        if ( !(data && typeof(data) === 'object') ) {
-            throw 'Missed or invalid format of required argument: data';
+        if (data && typeof(data) === 'object') {
+            if (data.email)   this.email   = data.email;
+            if (data.user_id) this.user_id = data.user_id;
         }
-
-        // check if email address set
-        if ( !data.hasOwnProperty('email') ) {
-            throw 'Missed required data key: email';
-        } else if ( !data.email ) {
-            errors.set('email', Translation.getMessage('errors.email_required'));
-        }
-
-        return errors.size ? errors : null;
     }
 
     async load() {
         if ( this.id ) return;
 
+        let loadByKey, loadByValue;
+
+        if (this.email) {
+            loadByKey   = 'email';
+            loadByValue = this.email;
+        } else if (this.user_id) {
+            loadByKey   = 'user_id';
+            loadByValue = this.user_id;
+        } else {
+            throw new Map([
+                ['email', Translation.getMessage('errors.email_required')]
+            ]);
+        }
+
         const db = KnexConnect.getInstance();
-        const [userLogin] = await db('user_login').where('email', this.email);
+        const [userLogin] = await db('user_login').where(loadByKey, loadByValue);
 
         if ( userLogin ) {
-
             this.id = userLogin.id;
             this.user_id = userLogin.user_id;
             this.password = userLogin.password;
@@ -77,6 +73,35 @@ class UserLogin {
         }
 
         this.password = new Password(password).encrypt();
+    }
+
+    async logSuccessLogin(loginData) {
+
+        if (!this.user_id) {
+            throw 'Missed required attribute value: user_id';
+        }
+
+        const db = KnexConnect.getInstance();
+
+        const [savedOk] = await db('user_login_history').insert({
+            ...loginData,
+            user_id: this.user_id,
+            success: 1,
+        });
+
+        return savedOk;
+    }
+
+    async logFailAttempt(loginData) {
+        const db = KnexConnect.getInstance();
+
+        const [savedOk] = await db('user_login_history').insert({
+            ...loginData,
+            user_id: this.user_id,
+            success: 0,
+        });
+
+        return savedOk;
     }
 }
 

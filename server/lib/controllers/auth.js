@@ -4,6 +4,14 @@ const UserLogin = include('models/UserLogin');
 const Translation = include('ui/Translation');
 const LocalPassport = include('auth/Passport');
 
+function getSaveLoginData(method, req) {
+    return {
+        method,
+        user_agent: req.headers['user-agent'],
+        ip_address: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    };
+}
+
 module.exports.getLogin = function(req, res) {
     res.locals = req.session.flash;
     delete req.session.flash;
@@ -26,14 +34,13 @@ module.exports.postRegister = async function(req, res, next) {
 
     try {
         const userLogin = new UserLogin({ email });
-        userLogin.setPassword(req.body.password);
-
         await userLogin.load();
 
         if ( userLogin.id ) {
             throw Translation.getMessage('errors.user_exists');
         }
 
+        userLogin.setPassword(req.body.password);
         const savedOk = await userLogin.save();
 
         if ( savedOk ) {
@@ -53,12 +60,20 @@ module.exports.postRegister = async function(req, res, next) {
 
 module.exports.postLogin = function(req, res, next) {
     const passport = LocalPassport.getInstance();
+    const method = 'local';
 
-    return passport.authenticate('local', (err, user, info) => {
+    return passport.authenticate(method, async (err, user, info) => {
         if ( err || !user ) {
+            try {
+                const userLogin = new UserLogin({ user_id: user || info?.user_id });
+                await userLogin.logFailAttempt(getSaveLoginData(method, req));
+            } catch (e) {
+                console.error(e);
+            }
+
             return next(err || Translation.getMessage('errors.login_unverified'));
         } else {
-            req.login(user, function(err) {
+            req.login(user, async function(err) {
                 if (err) return next(err);
 
                 if ( req.body.remember_me === 'on' ) {
@@ -71,6 +86,13 @@ module.exports.postLogin = function(req, res, next) {
                     req.session.cookie.maxAge = maxAge;
                 } else {
                     req.session.cookie.expires = false;
+                }
+
+                try {
+                    const userLogin = new UserLogin({ user_id: user });
+                    await userLogin.logSuccessLogin(getSaveLoginData(method, req));
+                } catch (err) {
+                    return next(err);
                 }
 
                 return res.redirect('/');

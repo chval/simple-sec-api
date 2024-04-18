@@ -27,7 +27,7 @@ module.exports.instance = new LocalStrategy(
         const passwordObj = new Password(password);
 
         if ( !passwordObj.check(userLogin.password) ) {
-            return done(null, false);
+            return done(null, false, {user_id: userLogin.user_id});
         }
 
         return done(null, userLogin.user_id);
